@@ -1,14 +1,15 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"flag"
 	"fmt"
 	"html/template"
+	"log"
 	"net/http"
 	"path/filepath"
-	"time"
+
+	apiv1 "k8s.io/api/core/v1"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -17,16 +18,23 @@ import (
 )
 
 type PodDetails struct {
-	Image     string `yaml:"image"`
-	PodName   string `yaml:"name"`
-	Namespace string `yaml:"namespace"`
+	Image     string
+	PodName   string
+	Namespace string
 	Success   bool
+	Failure   bool
 }
 
 func main() {
 	tmpl := template.Must(template.ParseFiles("index.html"))
+	clientset, err := createKubeClient()
+
+	if err != nil {
+		panic(err.Error())
+	}
 
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		log.Print("Starting request")
 		if r.Method != http.MethodPost {
 			tmpl.Execute(w, nil)
 			return
@@ -36,23 +44,25 @@ func main() {
 			Image:     r.FormValue("image"),
 			PodName:   r.FormValue("podName"),
 			Namespace: r.FormValue("namespace"),
-			Success:   true,
 		}
 
-		tmpl.Execute(w, details)
-		podTemplate := template.Must((template.ParseFiles(("pod-template.tmpl"))))
-		buf := &bytes.Buffer{}
+		status, _ := createPod(clientset, r.FormValue("image"), r.FormValue("podName"), r.FormValue("namespace"))
 
-		fmt.Println("Pod definition\n--------------")
-		podTemplate.Execute(buf, details)
-		fmt.Println(buf.String())
-		createPod()
+		if status == "Error" {
+			details.Failure = true
+		} else {
+			details.Success = true
+		}
+		log.Print("Rendering page")
+		tmpl.Execute(w, details)
 	})
 
+	log.Print("Application is available at http://localhost:8080")
 	http.ListenAndServe(":8080", nil)
 }
 
-func createPod() {
+func createKubeClient() (kubernetes.Clientset, error) {
+	log.Print("Creating kube client")
 	var kubeconfig *string
 	if home := homedir.HomeDir(); home != "" {
 		kubeconfig = flag.String("kubeconfig", filepath.Join(home, ".kube", "config"), "(optional) absolute path to the kubeconfig file")
@@ -72,13 +82,42 @@ func createPod() {
 	if err != nil {
 		panic(err.Error())
 	}
-	for {
-		pods, err := clientset.CoreV1().Pods("").List(context.TODO(), metav1.ListOptions{})
-		if err != nil {
-			panic(err.Error())
-		}
-		fmt.Printf("There are %d pods in the cluster\n", len(pods.Items))
 
-		time.Sleep(10 * time.Second)
+	return *clientset, err
+}
+
+func createPodObject(image, podName, namespace string) *apiv1.Pod {
+	log.Print("Creating Pod Object")
+	return &apiv1.Pod{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      podName,
+			Namespace: namespace,
+			Labels: map[string]string{
+				"app": podName,
+			},
+		},
+		Spec: apiv1.PodSpec{
+			Containers: []apiv1.Container{
+				{
+					Name:            image,
+					Image:           image,
+					ImagePullPolicy: apiv1.PullIfNotPresent,
+				},
+			},
+		},
 	}
+}
+
+func createPod(clientset kubernetes.Clientset, image, podName, namespace string) (string, error) {
+	var err error
+	pod := createPodObject(image, podName, namespace)
+	log.Print("Creating Pod")
+	pod, err = clientset.CoreV1().Pods(pod.Namespace).Create(context.TODO(), pod, metav1.CreateOptions{})
+
+	if err != nil {
+		log.Print(err)
+		return "Error", err
+	}
+	fmt.Println("Pod created successfully...")
+	return "Deployed", nil
 }
