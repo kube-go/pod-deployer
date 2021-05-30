@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: {{ .PodName }}
+  name: {{ .PodName }}
+  namespace: {{ .Namespace}}
+spec:
+  containers:
+  - image: {{ .Image}}
+    name: {{ .PodName }}
