@@ -112,7 +112,7 @@ func createPod(clientset kubernetes.Clientset, image, podName, namespace string)
 	var err error
 	pod := createPodObject(image, podName, namespace)
 	log.Print("Creating Pod")
-	pod, err = clientset.CoreV1().Pods(pod.Namespace).Create(context.TODO(), pod, metav1.CreateOptions{})
+	_, err = clientset.CoreV1().Pods(pod.Namespace).Create(context.TODO(), pod, metav1.CreateOptions{})
 
 	if err != nil {
 		log.Print(err)
