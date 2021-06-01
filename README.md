@@ -44,7 +44,7 @@ docker build . -t pod-deployer:$DATE
 *Note:* Mounted kube context directory as volume in container
 
 ```go
-docker run -p 8080:8080 -v $HOME/.kube:/home/deployer/.kube pod-deployer:v1
+docker run -p 8080:8080 -v $HOME/.kube:/home/deployer/.kube pod-deployer:$DATE
 ```
 
 
