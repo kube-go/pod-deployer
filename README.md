@@ -10,12 +10,13 @@ The motivation for creating this project is to get familiarize with [client-go](
 
 ## Usage
 
-### Pre-requisite
+#### Pre-requisite
 
 - Running kubernetes cluster and kube config available in the machine
-- Since pre-built binary not included you need to build yourself hence you need to have go `1.16+` installed in your system
 
 ### Build Locally
+
+- Since pre-built binary is not included you need to build yourself hence you need to have go `1.16+` installed in your system
 
 Build the application
 
@@ -31,7 +32,7 @@ go build
 ./pod-deployer
 ```
 
-### Docker
+### Docker way
 
 ```go
 DATE=$(date +"%Y%m%d")
