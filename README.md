@@ -33,10 +33,19 @@ go build
 
 ### Docker
 
+```go
+DATE=$(date +"%Y%m%d")
+docker build . -t pod-deployer:$DATE
 ```
-DATE=
-docker build . -t pod-deployer:
+
+#### Run as docker container
+
+*Note:* Mounted kube context directory as volume in container
+
+```go
+docker run -p 8080:8080 -v $HOME/.kube:/home/deployer/.kube pod-deployer:v1
 ```
+
 
 ## TODO
 
