@@ -26,7 +26,7 @@ type PodDetails struct {
 }
 
 func main() {
-	tmpl := template.Must(template.ParseFiles("index.html"))
+	tmpl := template.Must(template.ParseFiles("views/index.html"))
 	clientset, err := createKubeClient()
 
 	if err != nil {

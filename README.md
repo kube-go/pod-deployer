@@ -15,18 +15,27 @@ The motivation for creating this project is to get familiarize with [client-go](
 - Running kubernetes cluster and kube config available in the machine
 - Since pre-built binary not included you need to build yourself hence you need to have go `1.16+` installed in your system
 
-### Build
+### Build Locally
 
-Build the application from the location this repo is clonned
+Build the application
 
 ```go
+git clone https://github.com/kube-go/pod-deployer.git
+cd pod-deployer
 go build
 ```
 
-### Execute
+#### Execute
 
 ```go
 ./pod-deployer
+```
+
+### Docker
+
+```
+DATE=
+docker build . -t pod-deployer:
 ```
 
 ## TODO
