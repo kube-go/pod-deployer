@@ -50,7 +50,7 @@ docker run -p 8080:8080 -v $HOME/.kube:/home/deployer/.kube pod-deployer:$DATE
 
 ## TODO
 
-- [ ] Provide exact reason for failure in UI
+- [x] Provide exact reason for failure in UI
 
 - [ ] Option to view pod status, description, logs in UI
 

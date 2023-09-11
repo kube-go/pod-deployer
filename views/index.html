@@ -25,20 +25,24 @@
     </div>
     {{if .Success}}
     <div class="alert alert-success alert-dismissible fade show" role="alert">
-      Pod <strong>{{ .PodName }}</strong> will be deployed in <strong> {{ .Namespace }} </strong> namespace shortly.
+      Pod <strong>{{ .PodName }}</strong> will be deployed in <strong> {{ .Namespace }} </strong> namespace shortly
+      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    {{ else if .Failure}}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+      Pod <strong id="pod">{{ .PodName }}</strong> couldn't be deployed in <strong> {{ .Namespace }} </strong> <br>
+      {{ .ErrorMsg }}
       <button type="button" class="close" data-dismiss="alert" aria-label="Close">
         <span aria-hidden="true">&times;</span>
       </button>
     </div>
 
-    {{ else if .Failure}}
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-      Pod <strong>{{ .PodName }}</strong> couldn't be deployed in <strong> {{ .Namespace }} </strong> .
-      <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-      </button>
+    <div class="alert alert-info alert-dismissible fade show" role="alert">
+      Reload to try again!
     </div>
-    {{end}}
+    {{else}}
     <div class="alert alert-info" role="alert">
       <strong>Fill in details for pod below and click Deploy</strong>
     </div>
@@ -67,13 +71,13 @@
         </div>
       </div>
     </form>
+    {{end}}
   </div>
   <!-- Optional JavaScript; choose one of the two! -->
 
   <!-- Option 1: jQuery and Bootstrap Bundle (includes Popper) -->
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
-    crossorigin="anonymous"></script>
+  <script src="https://code.jquery.com/jquery-3.5.1.min.js"
+  integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
     integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns"
     crossorigin="anonymous"></script>
@@ -85,5 +89,23 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js" integrity="sha384-+YQ4JLhjyBLPDQt//I+STsc9iw4uQqACwlvpslubQzn4u2UU2UFM80nGisd026JF" crossorigin="anonymous"></script>
     -->
 </body>
+
+<script>
+  $(document).ready(function(){
+});
+
+function ajaxRequest(url, selectedElement){
+  $.ajax({
+    url: url,
+    cache: false,
+    success: function(html) {
+      selectedElement.html(html)
+    },
+    error: function() {
+      selectedElement.html("Error")
+    }
+  })
+}
+</script>
 
 </html>

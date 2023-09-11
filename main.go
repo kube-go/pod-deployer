@@ -9,8 +9,7 @@ import (
 	"net/http"
 	"path/filepath"
 
-	apiv1 "k8s.io/api/core/v1"
-
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -23,6 +22,8 @@ type PodDetails struct {
 	Namespace string
 	Success   bool
 	Failure   bool
+	ErrorMsg  error
+	Log       string
 }
 
 func main() {
@@ -46,13 +47,15 @@ func main() {
 			Namespace: r.FormValue("namespace"),
 		}
 
-		status, _ := createPod(clientset, r.FormValue("image"), r.FormValue("podName"), r.FormValue("namespace"))
+		status, err := createPod(clientset, r.FormValue("image"), r.FormValue("podName"), r.FormValue("namespace"))
+		details.ErrorMsg = err
 
 		if status == "Error" {
 			details.Failure = true
 		} else {
 			details.Success = true
 		}
+
 		log.Print("Rendering page")
 		tmpl.Execute(w, details)
 	})
@@ -86,22 +89,23 @@ func createKubeClient() (kubernetes.Clientset, error) {
 	return *clientset, err
 }
 
-func createPodObject(image, podName, namespace string) *apiv1.Pod {
+func createPodObject(image, podName, namespace string) *corev1.Pod {
 	log.Print("Creating Pod Object")
-	return &apiv1.Pod{
+	return &corev1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      podName,
 			Namespace: namespace,
 			Labels: map[string]string{
-				"app": podName,
+				"app":                       podName,
+				"kubernetes.io/deployed-by": "pod-deployer",
 			},
 		},
-		Spec: apiv1.PodSpec{
-			Containers: []apiv1.Container{
+		Spec: corev1.PodSpec{
+			Containers: []corev1.Container{
 				{
 					Name:            image,
 					Image:           image,
-					ImagePullPolicy: apiv1.PullIfNotPresent,
+					ImagePullPolicy: corev1.PullIfNotPresent,
 				},
 			},
 		},
